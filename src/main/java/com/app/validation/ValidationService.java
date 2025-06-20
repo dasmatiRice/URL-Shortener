@@ -15,5 +15,25 @@ public class ValidationService {
 		String s= validatorEngine.validateRedirectUrl(apiDevKey,shortUrl);
 		System.out.println(s);
 	}
+
+
+	public void validateCreate(String apiDevKey, String originalUrl, String customAlias) {
+		
+		String s= validateCreateUrl(apiDevKey,originalUrl,customAlias);
+		System.out.println(s);
+	}
+	
+	
+	public String validateCreateUrl(String apiDevKey, String originalUrl, String customAlias) throws RuntimeException  {
+		if(!(apiDevKey instanceof  String)){
+			throw new IllegalArgumentException();
+		}
+		if(!(originalUrl instanceof  String)){
+			throw new IllegalArgumentException();
+		}
+		
+		return "done validating";
+	}
+	
 	
 }

@@ -1,5 +1,8 @@
 package com.app.controller;
 
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,8 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.app.Repository.UrlItem;
+import com.app.Repository.UrlItemRepository;
 import com.app.model.CreateResponse;
-import com.app.service.RedirectionService;
 import com.app.service.ShortenerService;
 import com.app.validation.ValidationService;
 import com.app.validation.ValidatorEngine;
@@ -24,26 +28,27 @@ public class Controller {
 	// The URL shortener should support 3 methods creation, deletion, and redirect
 	@Autowired
 	ShortenerService shortenerService;
-
-	@Autowired
-	RedirectionService redirectionService;
 	
 	@Autowired
 	ValidationService validationService;
+	
+	@Autowired
+	UrlItemRepository urlRepository;
 
 
 	@PostMapping("/create")
-	public CreateResponse testGetMethod(@RequestParam(value = "name", defaultValue = "test") String apiDevKey,
-			@RequestParam(value = "name", defaultValue = "test") String originalUrl,
-			@RequestParam(value = "name", defaultValue = "test") String customAlias) {
+	public CreateResponse testGetMethod(@RequestParam String apiDevKey,
+			@RequestParam String originalUrl,
+			@RequestParam(required = false)  String customAlias) {
 
-//	String URL="";
-//	String apiDevKey="";
 
-		shortenerService.createURL(apiDevKey, originalUrl);
+		// call validator here to validate data fields
+		validationService.validateCreate(apiDevKey,originalUrl,customAlias);
+
+		String s= shortenerService.createURL(apiDevKey, originalUrl,customAlias);
 
 		CreateResponse response = new CreateResponse();
-		response.setResponse("test");
+		response.setResponse(s);
 		return response;
 
 	}
@@ -65,12 +70,30 @@ public class Controller {
 		validationService.validate(apiDevKey,shortUrl);
 		
 	
-		String urlPath = redirectionService.redirectUrl(apiDevKey, shortUrl);
+		String urlPath = shortenerService.redirectUrl(apiDevKey, shortUrl);
 
-		return new ResponseEntity<>("Redirecting to URL " + urlPath, HttpStatus.OK);
+		return new ResponseEntity<>("Redirecting to URL: " + urlPath, HttpStatus.OK);
 
 	}
 
+	@GetMapping("/GetAll")
+	public List<UrlItem> GetAll() {
+		
+		List<UrlItem> response= urlRepository.findAll();
+		return response;
+	}
+	
+	@GetMapping("/saveItem")
+	public UrlItem saveItem() {
+		
+		UrlItem u= new UrlItem((long)123,"or","sh",5);
+		UrlItem x= new UrlItem((long)1233,"or","sh",5);
+		
+		UrlItem response= urlRepository.save(u);
+		UrlItem response2= urlRepository.save(x);
+		return response;
+	}
+	
 	@GetMapping("/hello")
 	public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
 		return String.format("Hello %s!", name);
