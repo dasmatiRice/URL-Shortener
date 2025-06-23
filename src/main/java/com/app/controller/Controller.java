@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.app.Repository.UrlItem;
 import com.app.Repository.UrlItemRepository;
 import com.app.model.CreateResponse;
+import com.app.model.DeleteResponse;
 import com.app.service.ShortenerService;
 import com.app.validation.ValidationService;
 import com.app.validation.ValidatorEngine;
@@ -37,29 +38,56 @@ public class Controller {
 
 
 	@PostMapping("/create")
-	public CreateResponse testGetMethod(@RequestParam String apiDevKey,
-			@RequestParam String originalUrl,
+	public ResponseEntity<CreateResponse> createUrl(
+			@Valid @NotBlank @RequestParam String apiDevKey,
+			@Valid @NotBlank @RequestParam String originalUrl,
 			@RequestParam(required = false)  String customAlias) {
 
 
 		// call validator here to validate data fields
 		validationService.validateCreate(apiDevKey,originalUrl,customAlias);
 
-		String s= shortenerService.createURL(apiDevKey, originalUrl,customAlias);
+		String newShortUrl= shortenerService.createURL(apiDevKey, originalUrl,customAlias);
 
-		CreateResponse response = new CreateResponse();
-		response.setResponse(s);
-		return response;
+		CreateResponse response = new CreateResponse().builder().
+				originalUrl(originalUrl)
+				.shortUrl(newShortUrl)
+				.code(HttpStatus.OK)
+				.response("succeeded")
+				.build();
+		
+		
+		return new ResponseEntity<>(response, response.getCode());
 
 	}
 
 	@GetMapping("/delete")
-	public CreateResponse deleteUrl(@RequestParam(value = "name", defaultValue = "test") String name) {
+	public ResponseEntity<DeleteResponse> deleteUrl(
+			@Valid @NotBlank @RequestParam String apiDevKey,
+			@Valid @NotBlank @RequestParam String urlKey) {
+		
+		int count= shortenerService.deleteURL(apiDevKey, urlKey);
 
-		CreateResponse response = new CreateResponse();
-		response.setResponse("test");
+		DeleteResponse response = generateDeleteResponse(urlKey,count);
+		
+		return new ResponseEntity<>(response, response.getCode());
+
+
+	}
+
+	private DeleteResponse generateDeleteResponse(String urlKey,int count) {
+		
+		String result= count==0 ? "Failed to Delete":"Deleted";
+		HttpStatus code= count ==0 ? HttpStatus.BAD_REQUEST: HttpStatus.OK;
+		String status= code==HttpStatus.OK ? "success" : "fail";
+		
+		DeleteResponse response = new DeleteResponse().builder()
+				.shortUrl(urlKey)
+				.code(code)
+				.status(status)
+				.response(result)
+				.build();
 		return response;
-
 	}
 
 	@GetMapping("/redirectUrl")
@@ -67,12 +95,11 @@ public class Controller {
 			@Valid @NotBlank @RequestParam String shortUrl) {
 
 		// call validator here to validate data fields
-		validationService.validate(apiDevKey,shortUrl);
-		
+		validationService.validate(apiDevKey,shortUrl);	
 	
-		String urlPath = shortenerService.redirectUrl(apiDevKey, shortUrl);
+		String redirectUrlPath = shortenerService.redirectUrl(apiDevKey, shortUrl);
 
-		return new ResponseEntity<>("Redirecting to URL: " + urlPath, HttpStatus.OK);
+		return new ResponseEntity<>("Redirecting to URL: " + redirectUrlPath, HttpStatus.OK);
 
 	}
 
@@ -83,16 +110,6 @@ public class Controller {
 		return response;
 	}
 	
-	@GetMapping("/saveItem")
-	public UrlItem saveItem() {
-		
-		UrlItem u= new UrlItem((long)123,"or","sh",5);
-		UrlItem x= new UrlItem((long)1233,"or","sh",5);
-		
-		UrlItem response= urlRepository.save(u);
-		UrlItem response2= urlRepository.save(x);
-		return response;
-	}
 	
 	@GetMapping("/hello")
 	public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {

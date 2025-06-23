@@ -21,6 +21,8 @@ public interface UrlItemRepository extends MongoRepository<UrlItem, Long> {
 		
 		UrlItem save(UrlItem u);
 		
+		int deleteByShortUrl(String shortUrl);
+		
 //		@Query(value="{category:'?0'}", fields="{'name' : 1, 'quantity' : 1}")
 //		List<UrlItem> findAll(String category);
 		

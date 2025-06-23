@@ -14,11 +14,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @Data
 @Builder
-public class CreateResponse {
+public class DeleteResponse {
+	
+	private String status;
 	
 	private HttpStatus code;
-	
-	private String originalUrl;
 	
 	private String shortUrl;
 

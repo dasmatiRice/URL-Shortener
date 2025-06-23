@@ -14,79 +14,83 @@ import org.springframework.stereotype.Service;
 import com.app.Repository.UrlItem;
 import com.app.Repository.UrlItemRepository;
 
+import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
+import jakarta.validation.constraints.NotBlank;
+
 @Service
 public class ShortenerService {
-	
+
 	@Autowired
 	UrlItemRepository urlItemRepository;
-	
+
 	@Autowired
 	HashingService hashingService;
-	
-	final int defaultExpiryTime= 5000; 
-	
-	public String createURL(String apiDevKey, String originalUrl, String customAlias) {
-		
-		Optional<UrlItem> exists = urlItemRepository.findItemByOriginalUrl(originalUrl);
-		if(exists.isPresent()) {
-			throw new RuntimeException("URL already exists");
-		}
-		
 
-		UrlItem newItem = createUrlItem(originalUrl, customAlias);	
-		
+	final int defaultExpiryTime = 5000;
+
+	public String createURL(String apiDevKey, String originalUrl, String customAlias) {
+
+		Optional<UrlItem> existingUrl = urlItemRepository.findItemByOriginalUrl(originalUrl);
+		if (existingUrl.isPresent()) {
+			throw new ValidationException("URL already exists");
+		}
+
+		SecureRandom secureRandom = new SecureRandom();
+		long id = Math.abs(secureRandom.nextLong());
+
+		// hash the URL and make a custom url
+		UrlItem newItem = UrlItem.builder().id(id).originalUrl(originalUrl).expiryTime(defaultExpiryTime).build();
+
+		if (!Strings.isBlank(customAlias)) {
+			boolean isValid = isValidAlias(customAlias);
+			if (isValid) {
+				newItem.setShortUrl(customAlias);
+			}
+		} else {
+			String shortUrl = hashingService.generateShortUrl(id, originalUrl);
+			newItem.setShortUrl(shortUrl);
+		}
+
+		System.out.println("new short url is= " + newItem.getShortUrl());
 		urlItemRepository.save(newItem);
-		
+
 		return newItem.getShortUrl();
 	}
 
-	private UrlItem createUrlItem(String originalUrl, String customAlias) {
-		SecureRandom secureRandom = new SecureRandom();
-		long id = Math.abs(secureRandom.nextLong());
-		
-		//hash the URL and make a custom url
-		UrlItem newItem=  UrlItem.builder()
-				.id(id)
-				.originalUrl(originalUrl)
-				.expiryTime(defaultExpiryTime)
-				.build();
-		
-		if(!Strings.isBlank(customAlias)){
-			boolean isValidAlias= validateAlias(customAlias);
-			if (isValidAlias) {
-				newItem.setShortUrl(customAlias);
-			}
-		}else {
-			String shortUrl=hashingService.generateShortUrl(id,originalUrl);
-			newItem.setShortUrl(shortUrl);
-		}
-		
-		return newItem;
-	}
-	
-	private Boolean validateAlias(String customAlias) {
-		
+	private Boolean isValidAlias(String customAlias) {
+
 		if (!Strings.isBlank(customAlias)) {
 			Optional<UrlItem> itemByShortUrl = urlItemRepository.findItemByShortUrl(customAlias);
 			if (itemByShortUrl.isPresent()) {
-				throw new RuntimeException("Alias already exists, please try again with a different alias or allow us to create one for you");
+				throw new ValidationException(
+						"Alias already exists, please try again with a different alias or allow us to create one for you");
+			} else {
+				return true;
 			}
 		}
-		
+
 		return true;
 	}
 
 	public String redirectUrl(String apiDevKey, String shortUrl) {
-		
+
 //		UUID test=UUID.fromString("68504fdbc8a4668910dd462b");
-		
-		List<UrlItem> response= urlItemRepository.findAll();
-		
-		if (!response.isEmpty()){
-			return response.get(0).getShortUrl();
+
+		Optional<UrlItem> response = urlItemRepository.findItemByShortUrl(shortUrl);
+
+		if (response.isEmpty()) {
+			throw new RuntimeException("Shortened Url could not redirect or does not exist. Please try creating again");
 		}
-		
-		return "empty";
+
+		return response.get().getOriginalUrl();
+	}
+
+	public int deleteURL(String apiDevKey, String urlKey) {
+
+		int countDeletedItems = urlItemRepository.deleteByShortUrl(urlKey);
+
+		return countDeletedItems;
 	}
 
 }
