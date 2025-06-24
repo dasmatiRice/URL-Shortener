@@ -1,4 +1,4 @@
-package com.app.Repository;
+package com.app.repository;
 
 import java.time.LocalDate;
 import java.util.UUID;

@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.app.Repository.UrlItem;
-import com.app.Repository.UrlItemRepository;
 import com.app.model.CreateResponse;
 import com.app.model.DeleteResponse;
+import com.app.repository.UrlItem;
+import com.app.repository.UrlItemRepository;
 import com.app.service.ShortenerService;
 import com.app.validation.ValidationService;
 
@@ -113,8 +113,8 @@ public class Controller {
 	}
 	
 	
-	@GetMapping("/helloWorld")
-	public String helloWorld() {
-		return "Hello World";
+	@GetMapping("/health")
+	public String healthCheck() {
+		return "Server is up and running";
 	}
 }
