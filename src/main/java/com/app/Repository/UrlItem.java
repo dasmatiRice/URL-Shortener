@@ -1,5 +1,6 @@
 package com.app.Repository;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.springframework.data.annotation.Id;
@@ -25,7 +26,7 @@ public class UrlItem {
 	
 	private String shortUrl;
 	
-	private int expiryTime;
+	private LocalDate expiryDate;
 	
 //	public UrlItem(String id, String originalUrl, String shortUrl, int expiryTime) {
 //		super();

@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.app.validation.ExpiredUrlException;
+
 import jakarta.validation.ValidationException;
 
 @ControllerAdvice
@@ -22,6 +24,21 @@ public class GlobalExceptionHandler {
 		
 		return new ResponseEntity<>("Error recieved: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
 	}
+	
+	
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<String> invalidParameter(Exception ex){
+		
+		return new ResponseEntity<>("Error recieved: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler(ExpiredUrlException.class)
+	public ResponseEntity<String> expiredUrl(Exception ex){
+		
+		return new ResponseEntity<>("Error recieved: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+	
+
 	
 	
 }

@@ -2,6 +2,7 @@ package com.app.service;
 
 import java.security.SecureRandom;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.app.Repository.UrlItem;
 import com.app.Repository.UrlItemRepository;
+import com.app.validation.ExpiredUrlException;
 
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
@@ -27,9 +29,9 @@ public class ShortenerService {
 	@Autowired
 	HashingService hashingService;
 
-	final int defaultExpiryTime = 5000;
+	final LocalDate defaultExpiryTime = LocalDate.now().plusYears(2);
 
-	public String createURL(String apiDevKey, String originalUrl, String customAlias) {
+	public UrlItem createURL(String apiDevKey, String originalUrl, String customAlias, LocalDate expiryDate) {
 
 		Optional<UrlItem> existingUrl = urlItemRepository.findItemByOriginalUrl(originalUrl);
 		if (existingUrl.isPresent()) {
@@ -39,23 +41,37 @@ public class ShortenerService {
 		SecureRandom secureRandom = new SecureRandom();
 		long id = Math.abs(secureRandom.nextLong());
 
-		// hash the URL and make a custom url
-		UrlItem newItem = UrlItem.builder().id(id).originalUrl(originalUrl).expiryTime(defaultExpiryTime).build();
+		String shortUrl=determineShortUrl(originalUrl, customAlias, id);	
+		LocalDate expiration=determineExpiryDate(expiryDate);
+		
+		UrlItem newItem = UrlItem.builder().id(id).originalUrl(originalUrl).shortUrl(shortUrl).expiryDate(expiration).build();
+		
+		urlItemRepository.save(newItem);
+		
+		return newItem;
+	}
 
+	private LocalDate determineExpiryDate(LocalDate expiryDate) {
+		
+		if (expiryDate==null) {
+			return defaultExpiryTime;
+		}else {
+			return expiryDate;
+		}
+		
+	}
+
+	private String determineShortUrl(String originalUrl, String customAlias, long id) {
 		if (!Strings.isBlank(customAlias)) {
 			boolean isValid = isValidAlias(customAlias);
 			if (isValid) {
-				newItem.setShortUrl(customAlias);
+				return customAlias;
 			}
-		} else {
-			String shortUrl = hashingService.generateShortUrl(id, originalUrl);
-			newItem.setShortUrl(shortUrl);
-		}
+		} 
+		
+		return hashingService.generateShortUrl(id, originalUrl);
+		
 
-		System.out.println("new short url is= " + newItem.getShortUrl());
-		urlItemRepository.save(newItem);
-
-		return newItem.getShortUrl();
 	}
 
 	private Boolean isValidAlias(String customAlias) {
@@ -75,12 +91,18 @@ public class ShortenerService {
 
 	public String redirectUrl(String apiDevKey, String shortUrl) {
 
-//		UUID test=UUID.fromString("68504fdbc8a4668910dd462b");
-
 		Optional<UrlItem> response = urlItemRepository.findItemByShortUrl(shortUrl);
 
 		if (response.isEmpty()) {
 			throw new RuntimeException("Shortened Url could not redirect or does not exist. Please try creating again");
+		}else if(response.get().getExpiryDate().isBefore(LocalDate.now())) {
+			
+			//Delete the expired item and throw an exception
+			urlItemRepository.delete(response.get());
+			
+			String ex= "The Url you are attempting to hit has expired %s, please create the shortened URL again";
+			String exceptionMessage= String.format(ex, response.get().getExpiryDate());
+			throw new ExpiredUrlException(exceptionMessage);
 		}
 
 		return response.get().getOriginalUrl();

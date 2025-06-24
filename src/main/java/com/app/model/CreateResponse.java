@@ -1,5 +1,7 @@
 package com.app.model;
 
+import java.time.LocalDate;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +23,8 @@ public class CreateResponse {
 	private String originalUrl;
 	
 	private String shortUrl;
+	
+	private LocalDate expiration;
 
 	private String response;
 

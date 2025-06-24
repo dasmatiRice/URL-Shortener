@@ -1,5 +1,7 @@
 package com.app.controller;
 
+import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,7 +20,6 @@ import com.app.model.CreateResponse;
 import com.app.model.DeleteResponse;
 import com.app.service.ShortenerService;
 import com.app.validation.ValidationService;
-import com.app.validation.ValidatorEngine;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -26,7 +27,7 @@ import jakarta.validation.constraints.NotBlank;
 @RestController
 public class Controller {
 
-	// The URL shortener should support 3 methods creation, deletion, and redirect
+	// The URL shortener should support 3 methods creation, deletion, and redirect for the URLs
 	@Autowired
 	ShortenerService shortenerService;
 	
@@ -41,18 +42,18 @@ public class Controller {
 	public ResponseEntity<CreateResponse> createUrl(
 			@Valid @NotBlank @RequestParam String apiDevKey,
 			@Valid @NotBlank @RequestParam String originalUrl,
-			@RequestParam(required = false)  String customAlias) {
+			@RequestParam(required = false)  String customAlias,
+			@RequestParam(required = false)  LocalDate expiryDate) {
 
+		validationService.validateCreateUrl(apiDevKey,originalUrl,customAlias,expiryDate);
 
-		// call validator here to validate data fields
-		validationService.validateCreate(apiDevKey,originalUrl,customAlias);
+		UrlItem createdUrl= shortenerService.createURL(apiDevKey, originalUrl,customAlias, expiryDate);
 
-		String newShortUrl= shortenerService.createURL(apiDevKey, originalUrl,customAlias);
-
-		CreateResponse response = new CreateResponse().builder().
+		CreateResponse response = CreateResponse.builder().
 				originalUrl(originalUrl)
-				.shortUrl(newShortUrl)
+				.shortUrl(createdUrl.getShortUrl())
 				.code(HttpStatus.OK)
+				.expiration(createdUrl.getExpiryDate())
 				.response("succeeded")
 				.build();
 		
@@ -81,7 +82,7 @@ public class Controller {
 		HttpStatus code= count ==0 ? HttpStatus.BAD_REQUEST: HttpStatus.OK;
 		String status= code==HttpStatus.OK ? "success" : "fail";
 		
-		DeleteResponse response = new DeleteResponse().builder()
+		DeleteResponse response =  DeleteResponse.builder()
 				.shortUrl(urlKey)
 				.code(code)
 				.status(status)
@@ -91,19 +92,20 @@ public class Controller {
 	}
 
 	@GetMapping("/redirectUrl")
-	public ResponseEntity<String> redirectUrl(@Valid @NotBlank @RequestParam String apiDevKey,
+	public ResponseEntity<Void> redirectUrl(@Valid @NotBlank @RequestParam String apiDevKey,
 			@Valid @NotBlank @RequestParam String shortUrl) {
 
-		// call validator here to validate data fields
-		validationService.validate(apiDevKey,shortUrl);	
+		validationService.validateRedirectUrl(apiDevKey,shortUrl);	
 	
 		String redirectUrlPath = shortenerService.redirectUrl(apiDevKey, shortUrl);
-
-		return new ResponseEntity<>("Redirecting to URL: " + redirectUrlPath, HttpStatus.OK);
+		
+		URI redirectUri = URI.create(redirectUrlPath);
+	   
+		return ResponseEntity.status(HttpStatus.FOUND).location(redirectUri).build();
 
 	}
 
-	@GetMapping("/GetAll")
+	@GetMapping("/getAll")
 	public List<UrlItem> GetAll() {
 		
 		List<UrlItem> response= urlRepository.findAll();
@@ -111,8 +113,8 @@ public class Controller {
 	}
 	
 	
-	@GetMapping("/hello")
-	public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
-		return String.format("Hello %s!", name);
+	@GetMapping("/helloWorld")
+	public String helloWorld() {
+		return "Hello World";
 	}
 }
