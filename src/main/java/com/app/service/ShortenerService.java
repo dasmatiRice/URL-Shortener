@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import com.app.repository.UrlItem;
-import com.app.repository.UrlItemRepository;
+import com.app.Repository.UrlItem;
+import com.app.Repository.UrlItemRepository;
 import com.app.validation.ExpiredUrlException;
 
 import jakarta.validation.Valid;

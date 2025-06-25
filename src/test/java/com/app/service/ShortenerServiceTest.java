@@ -13,8 +13,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.app.repository.UrlItem;
-import com.app.repository.UrlItemRepository;
+import com.app.Repository.UrlItem;
+import com.app.Repository.UrlItemRepository;
 
 import jakarta.validation.ValidationException;
 

@@ -1,4 +1,4 @@
-package com.app.repository;
+package com.app.Repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
