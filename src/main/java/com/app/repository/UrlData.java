@@ -1,4 +1,4 @@
-package com.app.Repository;
+package com.app.repository;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class UrlItem {
+public class UrlData {
 
 	@Id
 	private Long id;
@@ -27,14 +27,5 @@ public class UrlItem {
 	private String shortUrl;
 	
 	private LocalDate expiryDate;
-	
-//	public UrlItem(String id, String originalUrl, String shortUrl, int expiryTime) {
-//		super();
-//		this.id=id;
-//		this.originalUrl=originalUrl;
-//		this.shortUrl=shortUrl;
-//		this.expiryTime=expiryTime;	
-//	}
-	
 	
 }

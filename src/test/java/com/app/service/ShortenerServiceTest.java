@@ -13,8 +13,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.app.Repository.UrlItem;
-import com.app.Repository.UrlItemRepository;
+import com.app.repository.UrlData;
+import com.app.repository.UrlDataRepository;
 
 import jakarta.validation.ValidationException;
 
@@ -25,7 +25,7 @@ public class ShortenerServiceTest {
 	
 	
 	@Mock
-	UrlItemRepository urlItemRepository;
+	UrlDataRepository urlItemRepository;
 	
 	@InjectMocks
 	ShortenerService shortenerService;
@@ -43,9 +43,9 @@ public class ShortenerServiceTest {
 		String customAlias="abc123test";
 		LocalDate expiryDate=LocalDate.now();
 		
-		UrlItem urlResponse= UrlItem.builder().id((long) 123344).shortUrl(customAlias).expiryDate(expiryDate).build();
+		UrlData urlResponse= UrlData.builder().id((long) 123344).shortUrl(customAlias).expiryDate(expiryDate).build();
 		
-		Optional<UrlItem> present = Optional.of(urlResponse);
+		Optional<UrlData> present = Optional.of(urlResponse);
 		
 		System.out.println(present.isPresent());
 		

@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.app.Repository.UrlItem;
-import com.app.Repository.UrlItemRepository;
 import com.app.model.CreateResponse;
 import com.app.model.DeleteResponse;
+import com.app.repository.UrlData;
+import com.app.repository.UrlDataRepository;
 import com.app.service.ShortenerService;
 import com.app.validation.ValidationService;
 
@@ -35,7 +35,7 @@ public class Controller {
 	ValidationService validationService;
 	
 	@Autowired
-	UrlItemRepository urlRepository;
+	UrlDataRepository urlRepository;
 
 
 	@PostMapping("/create")
@@ -47,7 +47,7 @@ public class Controller {
 
 		validationService.validateCreateUrl(apiDevKey,originalUrl,customAlias,expiryDate);
 
-		UrlItem createdUrl= shortenerService.createURL(apiDevKey, originalUrl,customAlias, expiryDate);
+		UrlData createdUrl= shortenerService.createURL(apiDevKey, originalUrl,customAlias, expiryDate);
 
 		CreateResponse response = CreateResponse.builder().
 				originalUrl(originalUrl)
@@ -106,9 +106,9 @@ public class Controller {
 	}
 
 	@GetMapping("/getAll")
-	public List<UrlItem> GetAll() {
+	public List<UrlData> GetAll() {
 		
-		List<UrlItem> response= urlRepository.findAll();
+		List<UrlData> response= urlRepository.findAll();
 		return response;
 	}
 	

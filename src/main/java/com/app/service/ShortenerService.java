@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import com.app.Repository.UrlItem;
-import com.app.Repository.UrlItemRepository;
+import com.app.repository.UrlData;
+import com.app.repository.UrlDataRepository;
 import com.app.validation.ExpiredUrlException;
 
 import jakarta.validation.Valid;
@@ -24,16 +24,16 @@ import jakarta.validation.constraints.NotBlank;
 public class ShortenerService {
 
 	@Autowired
-	UrlItemRepository urlItemRepository;
+	UrlDataRepository urlItemRepository;
 
 	@Autowired
 	HashingService hashingService;
 
 	final LocalDate defaultExpiryTime = LocalDate.now().plusYears(2);
 
-	public UrlItem createURL(String apiDevKey, String originalUrl, String customAlias, LocalDate expiryDate) {
+	public UrlData createURL(String apiDevKey, String originalUrl, String customAlias, LocalDate expiryDate) {
 
-		Optional<UrlItem> existingUrl = urlItemRepository.findItemByOriginalUrl(originalUrl);
+		Optional<UrlData> existingUrl = urlItemRepository.findItemByOriginalUrl(originalUrl);
 		if (existingUrl.isPresent()) {
 			throw new ValidationException("URL already exists");
 		}
@@ -44,7 +44,7 @@ public class ShortenerService {
 		String shortUrl=determineShortUrl(originalUrl, customAlias, id);	
 		LocalDate expiration=determineExpiryDate(expiryDate);
 		
-		UrlItem newItem = UrlItem.builder().id(id).originalUrl(originalUrl).shortUrl(shortUrl).expiryDate(expiration).build();
+		UrlData newItem = UrlData.builder().id(id).originalUrl(originalUrl).shortUrl(shortUrl).expiryDate(expiration).build();
 		
 		urlItemRepository.save(newItem);
 		
@@ -77,7 +77,7 @@ public class ShortenerService {
 	private Boolean isValidAlias(String customAlias) {
 
 		if (!Strings.isBlank(customAlias)) {
-			Optional<UrlItem> itemByShortUrl = urlItemRepository.findItemByShortUrl(customAlias);
+			Optional<UrlData> itemByShortUrl = urlItemRepository.findItemByShortUrl(customAlias);
 			if (itemByShortUrl.isPresent()) {
 				throw new ValidationException(
 						"Alias already exists, please try again with a different alias or allow us to create one for you");
@@ -91,7 +91,7 @@ public class ShortenerService {
 
 	public String redirectUrl(String apiDevKey, String shortUrl) {
 
-		Optional<UrlItem> response = urlItemRepository.findItemByShortUrl(shortUrl);
+		Optional<UrlData> response = urlItemRepository.findItemByShortUrl(shortUrl);
 
 		if (response.isEmpty()) {
 			throw new RuntimeException("Shortened Url could not redirect or does not exist. Please try creating again");

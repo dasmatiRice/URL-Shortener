@@ -1,18 +1,18 @@
-package com.app.Repository;
+package com.app.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class UrlItemRepositoryImplementation {
+public class UrlDataRepositoryImplementation {
 	
 	@Autowired
-	UrlItemRepository urlRepository;
+	UrlDataRepository urlRepository;
 	
 	public void findItemByOriginalUrl() {
 		urlRepository.findItemByOriginalUrl("68504fdbc8a4668910dd462b");
 	}
 	
-	public UrlItem saveUrlItem(UrlItem u) {
-		UrlItem response= urlRepository.save(u);
+	public UrlData saveUrlItem(UrlData u) {
+		UrlData response= urlRepository.save(u);
 		return response;
 	}
 	

@@ -1,4 +1,4 @@
-package com.app.Repository;
+package com.app.repository;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,19 +7,19 @@ import java.util.UUID;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
-public interface UrlItemRepository extends MongoRepository<UrlItem, Long> {
+public interface UrlDataRepository extends MongoRepository<UrlData, Long> {
 		
 		@Query("{originalUrl:'?0'}")
-		Optional<UrlItem> findItemByOriginalUrl(String name);
+		Optional<UrlData> findItemByOriginalUrl(String name);
 		
 //		@Query("{id:'?0'}")
-		Optional<UrlItem> findItemById(String id);
+		Optional<UrlData> findItemById(String id);
 		
-		Optional<UrlItem> findItemByShortUrl(String id);
+		Optional<UrlData> findItemByShortUrl(String id);
 		
-		List<UrlItem> findAll();
+		List<UrlData> findAll();
 		
-		UrlItem save(UrlItem u);
+		UrlData save(UrlData u);
 		
 		int deleteByShortUrl(String shortUrl);
 		
