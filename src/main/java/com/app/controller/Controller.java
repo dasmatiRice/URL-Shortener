@@ -38,7 +38,7 @@ public class Controller {
 	UrlDataRepository urlRepository;
 
 
-	@PostMapping("/create")
+	@PostMapping("/createUrl")
 	public ResponseEntity<CreateResponse> createUrl(
 			@Valid @NotBlank @RequestParam String apiDevKey,
 			@Valid @NotBlank @RequestParam String originalUrl,
@@ -62,12 +62,12 @@ public class Controller {
 
 	}
 
-	@GetMapping("/delete")
+	@GetMapping("/deleteUrl")
 	public ResponseEntity<DeleteResponse> deleteUrl(
 			@Valid @NotBlank @RequestParam String apiDevKey,
 			@Valid @NotBlank @RequestParam String urlKey) {
 		
-		int count= shortenerService.deleteURL(apiDevKey, urlKey);
+		int count= shortenerService.deleteUrl(apiDevKey, urlKey);
 
 		DeleteResponse response = generateDeleteResponse(urlKey,count);
 		

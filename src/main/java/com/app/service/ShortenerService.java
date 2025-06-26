@@ -108,7 +108,7 @@ public class ShortenerService {
 		return response.get().getOriginalUrl();
 	}
 
-	public int deleteURL(String apiDevKey, String urlKey) {
+	public int deleteUrl(String apiDevKey, String urlKey) {
 
 		int countDeletedItems = urlItemRepository.deleteByShortUrl(urlKey);
 

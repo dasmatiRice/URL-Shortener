@@ -64,7 +64,7 @@ public class ShortenerServiceTest {
 
 		when(urlItemRepository.deleteByShortUrl(shortUrl)).thenReturn(1);
 		
-		int result=shortenerService.deleteURL(apiKey, shortUrl);
+		int result=shortenerService.deleteUrl(apiKey, shortUrl);
 		
 		Assertions.assertEquals(1, result);
 		
@@ -75,7 +75,7 @@ public class ShortenerServiceTest {
 		
 		when(urlItemRepository.deleteByShortUrl(shortUrl)).thenReturn(0);
 		
-		int result=shortenerService.deleteURL(apiKey, shortUrl);
+		int result=shortenerService.deleteUrl(apiKey, shortUrl);
 		
 		Assertions.assertEquals(0, result);
 		

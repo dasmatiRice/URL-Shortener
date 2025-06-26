@@ -38,7 +38,4 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>("Error recieved: " + ex.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 	
-
-	
-	
 }
