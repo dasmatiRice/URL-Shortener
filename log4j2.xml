@@ -1,8 +1,0 @@
-<Configuration status="debug" fileName="log/main.log" packages="">
-	<Appenders>
-		<Console name="stdout" target="SYSTEM_OUT">
-			<PatternLayout
-				pattern="%d{yyyy-MM-dd HH:mm:ss} %p %m%n" />
-		</Console>
-	</Appenders>
-</Configuration>

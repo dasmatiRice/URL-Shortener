@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,8 @@ import com.app.validation.ValidationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 
+
+
 @RestController
 public class Controller {
 
@@ -36,6 +40,8 @@ public class Controller {
 	
 	@Autowired
 	UrlDataRepository urlRepository;
+	
+	 private static final Logger log = LoggerFactory.getLogger(Controller.class);
 
 
 	@PostMapping("/createUrl")
@@ -45,9 +51,12 @@ public class Controller {
 			@RequestParam(required = false)  String customAlias,
 			@RequestParam(required = false)  LocalDate expiryDate) {
 
+		log.info("Calling Create URL with params: "+" apiDevKey= "+" originalUrl= "+" customAlias= "+ " expiryDate= ",apiDevKey,originalUrl,customAlias,expiryDate);
+		
 		validationService.validateCreateUrl(apiDevKey,originalUrl,customAlias,expiryDate);
 
 		UrlData createdUrl= shortenerService.createURL(apiDevKey, originalUrl,customAlias, expiryDate);
+		
 
 		CreateResponse response = CreateResponse.builder().
 				originalUrl(originalUrl)
@@ -56,6 +65,8 @@ public class Controller {
 				.expiration(createdUrl.getExpiryDate())
 				.response("succeeded")
 				.build();
+		
+		log.info("Created Url Response: ",response);
 		
 		
 		return new ResponseEntity<>(response, response.getCode());
@@ -70,6 +81,8 @@ public class Controller {
 		int count= shortenerService.deleteUrl(apiDevKey, urlKey);
 
 		DeleteResponse response = generateDeleteResponse(urlKey,count);
+		
+		log.info("Deleting URL Response: ", response);
 		
 		return new ResponseEntity<>(response, response.getCode());
 
@@ -88,12 +101,15 @@ public class Controller {
 				.status(status)
 				.response(result)
 				.build();
+		
 		return response;
 	}
 
 	@GetMapping("/redirectUrl")
 	public ResponseEntity<Void> redirectUrl(@Valid @NotBlank @RequestParam String apiDevKey,
 			@Valid @NotBlank @RequestParam String shortUrl) {
+		
+		log.info("Redirecting URL: ",shortUrl);
 
 		validationService.validateRedirectUrl(apiDevKey,shortUrl);	
 	
@@ -101,12 +117,15 @@ public class Controller {
 		
 		URI redirectUri = URI.create(redirectUrlPath);
 	   
+		log.info("Redirection URL Response: ", redirectUri);
 		return ResponseEntity.status(HttpStatus.FOUND).location(redirectUri).build();
 
 	}
 
 	@GetMapping("/getAll")
 	public List<UrlData> GetAll() {
+		
+		log.info("Getting All Items");
 		
 		List<UrlData> response= urlRepository.findAll();
 		return response;
@@ -115,6 +134,7 @@ public class Controller {
 	
 	@GetMapping("/health")
 	public String healthCheck() {
+		log.info("Running Health Check");
 		return "Server is up and running";
 	}
 }

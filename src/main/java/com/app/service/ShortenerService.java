@@ -8,10 +8,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.logging.log4j.util.Strings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import com.app.controller.Controller;
 import com.app.repository.UrlData;
 import com.app.repository.UrlDataRepository;
 import com.app.validation.ExpiredUrlException;
@@ -28,6 +31,8 @@ public class ShortenerService {
 
 	@Autowired
 	HashingService hashingService;
+	
+	private static final Logger log = LoggerFactory.getLogger(Controller.class);
 
 	final LocalDate defaultExpiryTime = LocalDate.now().plusYears(2);
 
@@ -46,9 +51,10 @@ public class ShortenerService {
 		
 		UrlData newItem = UrlData.builder().id(id).originalUrl(originalUrl).shortUrl(shortUrl).expiryDate(expiration).build();
 		
-		urlItemRepository.save(newItem);
+		UrlData response= urlItemRepository.save(newItem);
 		
-		return newItem;
+		log.info("finished creating shortened URL");
+		return response;
 	}
 
 	private LocalDate determineExpiryDate(LocalDate expiryDate) {
@@ -105,6 +111,8 @@ public class ShortenerService {
 			throw new ExpiredUrlException(exceptionMessage);
 		}
 
+		log.info("finished redirecting to URL");
+		
 		return response.get().getOriginalUrl();
 	}
 
@@ -112,6 +120,8 @@ public class ShortenerService {
 
 		int countDeletedItems = urlItemRepository.deleteByShortUrl(urlKey);
 
+		log.info("finished Deleting URL");
+		
 		return countDeletedItems;
 	}
 

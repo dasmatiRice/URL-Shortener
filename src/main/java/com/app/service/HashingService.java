@@ -3,7 +3,11 @@ package com.app.service;
 import java.security.SecureRandom;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import com.app.controller.Controller;
 
 @Service
 public class HashingService {

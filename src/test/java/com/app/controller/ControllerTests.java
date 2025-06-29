@@ -49,12 +49,7 @@ public class ControllerTests {
 	LocalDate expiryDateToday=LocalDate.now();
 	LocalDate expiryDateDefault=LocalDate.now().plusYears(2);
 	
-	UrlData item1= UrlData.builder().id(null).originalUrl(null).shortUrl(null).build();
-	
 	String aliasExistsException= "Alias already exists, please try again with a different alias or allow us to create one for you";
-	
-//	SecureRandom secureRandom = new SecureRandom();
-//	long id = Math.abs(secureRandom.nextLong());
 	
 	String apiDevKey= "Admin";
 	String originalUrl="youtube.com";
@@ -81,11 +76,7 @@ public class ControllerTests {
 
 		ResponseEntity<CreateResponse> actual= controller.createUrl(apiDevKey, originalUrl, null, null);
 		
-		Assertions.assertTrue(actual.getBody()!=null);
-		Assertions.assertEquals(expected.getStatusCode(),actual.getStatusCode());
-		Assertions.assertEquals(expected.getBody().getOriginalUrl(),actual.getBody().getOriginalUrl());
-		Assertions.assertEquals(expected.getBody().getExpiration(),actual.getBody().getExpiration());
-					
+		validateCreateUrl(expected, actual);			
 	}
 	
 	@Test
@@ -110,11 +101,7 @@ public class ControllerTests {
 		ResponseEntity<CreateResponse> expected = new ResponseEntity<>(cr,cr.getCode());
 		ResponseEntity<CreateResponse> actual= controller.createUrl(apiDevKey, originalUrl, null, null);
 		
-		Assertions.assertTrue(actual.getBody()!=null);
-		Assertions.assertEquals(expected.getStatusCode(),actual.getStatusCode());
-		Assertions.assertEquals(expected.getBody().getOriginalUrl(),actual.getBody().getOriginalUrl());
-		Assertions.assertEquals(expected.getBody().getExpiration(),actual.getBody().getExpiration());
-		Assertions.assertEquals(expected.getBody().getShortUrl(),actual.getBody().getShortUrl());
+		validateCreateUrl(expected, actual);
 					
 	}
 	
@@ -131,22 +118,57 @@ public class ControllerTests {
 	}
 	
 	@Test
+	void createUrlCustomExpirationDate() {
+		
+		LocalDate customExpiryDate=LocalDate.now().plusYears(1);
+	
+		UrlData createItem= UrlData.builder().id(null).originalUrl(originalUrl).shortUrl("test123").expiryDate(customExpiryDate).build();
+		
+		doNothing().when(validationService).validateCreateUrl(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+		
+		when(shortenerService.createURL(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any()))
+		.thenReturn(createItem);
+		
+		CreateResponse cr= CreateResponse.builder().
+				originalUrl(originalUrl)
+				.shortUrl("test123")
+				.code(HttpStatus.OK)
+				.expiration(customExpiryDate)
+				.response("succeeded")
+				.build();
+		
+		ResponseEntity<CreateResponse> expected = new ResponseEntity<>(cr,cr.getCode());
+
+		ResponseEntity<CreateResponse> actual= controller.createUrl(apiDevKey, originalUrl, null, null);
+		
+		validateCreateUrl(expected, actual);
+		
+	}
+
+	private void validateCreateUrl(ResponseEntity<CreateResponse> expected, ResponseEntity<CreateResponse> actual) {
+		Assertions.assertTrue(actual.getBody()!=null);
+		Assertions.assertEquals(expected.getStatusCode(),actual.getStatusCode());
+		Assertions.assertEquals(expected.getBody().getOriginalUrl(),actual.getBody().getOriginalUrl());
+		Assertions.assertEquals(expected.getBody().getExpiration(),actual.getBody().getExpiration());
+		Assertions.assertEquals(expected.getBody().getShortUrl(),actual.getBody().getShortUrl());
+	}
+	
+	
+	@Test
 	void deleteUrlNothingDeleted() {
 		
 //		doNothing().when(validationService).validateCreateUrl(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 		
 		when(shortenerService.deleteUrl(Mockito.any(),Mockito.any()))
 		.thenReturn(0);
-		
-		
+			
 		DeleteResponse dr =  DeleteResponse.builder()
 				.shortUrl("test123")
 				.code(HttpStatus.BAD_REQUEST)
 				.status("fail")
 				.response("Failed to Delete")
 				.build();
-		
-		
+			
 		ResponseEntity<DeleteResponse> expected = new ResponseEntity<>(dr,dr.getCode());
 		
 		ResponseEntity<DeleteResponse> actual= controller.deleteUrl(apiDevKey, originalUrl);
@@ -156,11 +178,8 @@ public class ControllerTests {
 		Assertions.assertEquals(expected.getBody().getCode(),actual.getBody().getCode());
 		Assertions.assertEquals(expected.getBody().getStatus(),actual.getBody().getStatus());
 		Assertions.assertEquals(expected.getBody().getResponse(),actual.getBody().getResponse());
-					
-		
-	
+
 	}
-	
 	
 	@Test
 	void deleteUrlSuccess() {
@@ -169,16 +188,14 @@ public class ControllerTests {
 		
 		when(shortenerService.deleteUrl(Mockito.any(),Mockito.any()))
 		.thenReturn(1);
-		
-		
+				
 		DeleteResponse dr =  DeleteResponse.builder()
 				.shortUrl("test123")
 				.code(HttpStatus.OK)
 				.status("success")
 				.response("Deleted")
 				.build();
-		
-		
+				
 		ResponseEntity<DeleteResponse> expected = new ResponseEntity<>(dr,dr.getCode());
 		
 		ResponseEntity<DeleteResponse> actual= controller.deleteUrl(apiDevKey, originalUrl);
@@ -188,9 +205,8 @@ public class ControllerTests {
 		Assertions.assertEquals(expected.getBody().getCode(),actual.getBody().getCode());
 		Assertions.assertEquals(expected.getBody().getStatus(),actual.getBody().getStatus());
 		Assertions.assertEquals(expected.getBody().getResponse(),actual.getBody().getResponse());
-					
-		
 	
 	}
+	
 
 }
