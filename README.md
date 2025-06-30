@@ -1,7 +1,7 @@
 # URL-Shortener
 
 
-## 📌 Objective
+## Objective
 
 This project demonstrates how to design and implement a robust, testable REST API for shortening URLs, with production-ready features like:
 - **Swagger UI** for interactive API documentation
@@ -12,7 +12,7 @@ This project demonstrates how to design and implement a robust, testable REST AP
 
 ---
 
-## 🛠️ Tools Used
+## Tools Used
 
 | Tool | Purpose |
 |----------------|--------------------------------|
@@ -26,7 +26,7 @@ This project demonstrates how to design and implement a robust, testable REST AP
 
 ---
 
-## ✅ Prerequisites
+## Prerequisites
 
 - **Java 21** installed  
 - **Maven 3.8+** installed  
@@ -35,7 +35,7 @@ This project demonstrates how to design and implement a robust, testable REST AP
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 1. **Clone the Repository**
    ```bash
@@ -50,21 +50,23 @@ run:  mvn spring-boot:run
 	mvn spring-boot:run
 
 
-##Design Considerations
+## Design Considerations
 
-#Api Documentation
+# Api Documentation
 
 the Api endpoints can be seen via swagger by following this link:
 http://localhost:8080/swagger-ui/index.html#/ 
 
 | Method | Endpoint           | Description                       |
 | ------ | ------------------ | --------------------------------- |
-| `POST` | `createUrl`     | Create a new short URL            |
-| `GET`  | `/api/{shortUrl}`  | Redirect to the original long URL |
-| `GET`  | `/swagger-ui.html` | Access the Swagger UI             |
+| `POST` | `createUrl`     	  | Create a new short URL            |
+| `GET`  | `/redirectUrl`     | Redirect to the original long URL |
+| `GET`  | `/deleteUrl`       | Delete a Short URL                |
+| `GET`  | `/health`          | Checks is server is up and running|
+| `GET`  | `/GetAll`          | Gets all items in DB              |
 
 
-#Logging
+# Logging
 Logging is configured using Logback.
 All application logs are written to main.log in the project root directory.
 Logs include info, warnings, and error traces for easier debugging and tracing.
