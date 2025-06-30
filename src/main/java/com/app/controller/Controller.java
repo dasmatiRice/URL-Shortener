@@ -23,6 +23,8 @@ import com.app.repository.UrlData;
 import com.app.repository.UrlDataRepository;
 import com.app.service.ShortenerService;
 import com.app.validation.ValidationService;
+import com.google.genai.Client;
+import com.google.genai.types.GenerateContentResponse;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
@@ -141,4 +143,18 @@ public class Controller {
 		log.info("Running Health Check");
 		return "Server is up and running";
 	}
+	
+	@GetMapping("/testAI")
+	public String testAI() {
+		Client client = new Client();
+
+	    GenerateContentResponse response =
+	        client.models.generateContent(
+	            "gemini-2.5-flash",
+	            "Can you tell me if the following link is malicious or not?: mp3raid.com/music/krizz_kaliko.html",
+	            null);
+
+	   return response.text();
+	}
+
 }
