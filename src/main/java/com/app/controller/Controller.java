@@ -21,6 +21,7 @@ import com.app.model.CreateResponse;
 import com.app.model.DeleteResponse;
 import com.app.repository.UrlData;
 import com.app.repository.UrlDataRepository;
+import com.app.service.GeminiService;
 import com.app.service.ShortenerService;
 import com.app.validation.ValidationService;
 import com.google.genai.Client;
