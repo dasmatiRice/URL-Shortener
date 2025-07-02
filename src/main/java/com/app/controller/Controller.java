@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,8 +72,9 @@ public class Controller {
 
 			UrlData createdUrl = shortenerService.createURL(apiDevKey, originalUrl, customAlias, expiryDate);
 
+			String resp= "We succeeded in shortening your link! You can access your original url by going to localhost:8080/"+createdUrl.getShortUrl();
 			CreateResponse response = CreateResponse.builder().originalUrl(originalUrl).shortUrl(createdUrl.getShortUrl())
-					.code(HttpStatus.OK).expiration(createdUrl.getExpiryDate()).response("succeeded").build();
+					.code(HttpStatus.OK).expiration(createdUrl.getExpiryDate()).response(resp).build();
 
 			log.info("Created Url Response: ", response);
 
@@ -113,9 +115,9 @@ public class Controller {
 		return response;
 	}
 
-	@GetMapping("/redirectUrl")
+	@GetMapping("/{shortUrl}")
 	public ResponseEntity<Void> redirectUrl(@Valid @NotBlank @RequestParam String apiDevKey,
-			@Valid @NotBlank @RequestParam String shortUrl) {
+			@Valid @NotBlank @PathVariable String shortUrl) {
 
 		log.info("Redirecting URL: ", shortUrl);
 
