@@ -31,8 +31,6 @@ This project demonstrates how to design and implement testable REST API for shor
 | **bucket4j**                     | Rate Limiting/Abuse prevention |
 
 
-
-
 ---
 
 ## Prerequisites
@@ -52,14 +50,16 @@ This project demonstrates how to design and implement testable REST API for shor
    cd url-shortener
    
 2. **Build the Project**
-
-run:  mvn spring-boot:run
+   ```bash
+   mvn spring-boot:run
 
 3. **Run the Project**
-	mvn spring-boot:run
+   ```bash
+   mvn spring-boot:run
 
+---
 
-## Design Considerations
+# Design Considerations
 
 A URL Shortening Service seems to be a simple program but actually has many parts and requirements. This section will go over all the design considerations I've made and the tools I have used.
 
@@ -77,15 +77,6 @@ A URL Shortening Service seems to be a simple program but actually has many part
 - Secure/unpredictable links: The short links our service creates should be highly unpredictable to prevent malicious entities from guessing our url hashing.
 
 
-The Design of the Service can be split into a few key components:
-
-1. Clients will hit certain APIs exposed to them to use our service
-2. A Rest Service to pick up the client's input and give them back a proper response based on API endpoint they hit
-   1. create -> return a shortened URL
-   2. redirect -> redirect them to the original URL link they shortened
-   3. delete -> delete our url from the database
-3. Storing Data in a Database
-
 Our system will expose 3 REST APIS for clients to hit to create, redirect, and delete URLs.
 
 they will follow a design similir to the methods below:
@@ -102,6 +93,8 @@ delete(api_dev_key, short_url)
 | **custom_alias** | OPTIONAL field to have a custom short URL                                                                           |
 | **expiry_date**  | OPTIONAL field to have a custom expiry date                                                                         |
 
+The default expiration time is 2 years for today's date
+
 ## Database
 Our Assumption is that we will have millions of users utilizing our service, as a result we will be storing lots of data and need a horizontally scalably DB. I chose MongoDB
 because its is a great horizontally scaling NOSQL database. MongoDB also ensure atomicity at the Document level.
@@ -112,6 +105,7 @@ because its is a great horizontally scaling NOSQL database. MongoDB also ensure 
  MongoDb's replication strategy  follows a primary-secondary node strategy which is perfect for our service. The primary Node handles all write operations (and can assist with read operations) and the secondary nodes will poll the primary node at set intervals to update their information. This lets us use our secondary nodes to assist with Read operations, helping distribute the workload. We can add a load balancer in between to determine which node is free to send client requests to using a Round Robin strategy or doing help checks to ping available servers.
 
 
+
 # Code Walkthrough
 
 I've created a flowchart to show how the code flows through the system
@@ -120,8 +114,7 @@ I've created a flowchart to show how the code flows through the system
 
 - The Controller is the main entry into the system. For info regarding the APIs check out the Api Documentation section
 - The Shorteneing Service implements the main business logic
-- The Gemini Service, hosts our AI call to Gemini to check is a URL is malicious or not. The purpose of adding Gemini and AI integration was just to showcase that AI can be integrated into this service easily. We can use it for any other features we need as well. However, I do not think this service in particular needs AI integration. The calls to Gemini are very bandwidth intensive and to check it every time we create a URL will tie up resources. It may be better to make one large call when our service has low usage
-
+- The Gemini Service, hosts our AI call to Gemini to check is a URL is malicious or not. For more info check out the AI integration section
 
 ### Api Documentation
 
@@ -141,6 +134,7 @@ http://localhost:8080/swagger-ui/index.html#/
 
 To generate our short URLS I have created a HashingService class. That class takes the original URL and hashes it with base58 hashing. I have chosen to remove the 
 following characters because it can be confusing for end users to read and type those characters as some look similar.
+**Removed:**
 - O (capital o)
 - 0 (zero)
 - I (capital I)
@@ -149,9 +143,20 @@ following characters because it can be confusing for end users to read and type 
 - / (slash)
 
 ### Rate Limiting
+I implemented Rate limiting using a token-bucket algorithm using bucket4j for the service. Rate limiting is important to prevent people with malicious intents to abuse our system. Its to prevent people to continiously spamming calls to the servers and causing our systems to fail for everyone. 
+
+Ive configured the bucket to hold a maximum of 50 tokens and every minute it refreshes up to 50 tokens. This number can be easily scaled up or down based on the volume of requests we get and out system requirements. 
+
+### AI Integration
+
+The GeminiService class was added to showcase some basic AI integration into the project. It was easy integrate and has added a lot of benefits to project. I used Gemini specifically to check for malicious original URLs during the encoding process. It was to make sure those new links cant be used to scam or trick other people.   
+Going forward in the future we can ask Gemini to analyze our data and run more complicated scenarios which we can provide to our users.
+
+However, I do not think this service in particular needs AI integration. The calls to Gemini are very bandwidth intensive and to check it every time we create a URL will tie up resources. It may be better to make one large call and when our service has low usage
 
 
 ### Unit Testing
+The core business logic has been unit tested using Mockito and Junit
 
 ### Logging
 Logging is configured using Logback.
