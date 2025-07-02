@@ -114,7 +114,30 @@ because its is a great horizontally scaling NOSQL database. MongoDB also ensure 
 
 # Code Walkthrough
 
-## Short URL Generation
+I've created a flowchart to show how the code flows through the system
+
+![alt text](flowchart.png)
+
+- The Controller is the main entry into the system. For info regarding the APIs check out the Api Documentation section
+- The Shorteneing Service implements the main business logic
+- The Gemini Service, hosts our AI call to Gemini to check is a URL is malicious or not. The purpose of adding Gemini and AI integration was just to showcase that AI can be integrated into this service easily. We can use it for any other features we need as well. However, I do not think this service in particular needs AI integration. The calls to Gemini are very bandwidth intensive and to check it every time we create a URL will tie up resources. It may be better to make one large call when our service has low usage
+
+
+### Api Documentation
+
+the Api endpoints can be seen via swagger by following this link:
+http://localhost:8080/swagger-ui/index.html#/ 
+
+
+| Method | Endpoint      | Description                        |
+| ------ | ------------- | ---------------------------------- |
+| `POST` | `createUrl`   | Create a new short URL             |
+| `GET`  | `/{shortUrl}` | Redirect to the original long URL  |
+| `GET`  | `/deleteUrl`  | Delete a Short URL                 |
+| `GET`  | `/health`     | Checks id server is up and running |
+| `GET`  | `/GetAll`     | Gets all items in DB               |
+
+### Short URL Generation
 
 To generate our short URLS I have created a HashingService class. That class takes the original URL and hashes it with base58 hashing. I have chosen to remove the 
 following characters because it can be confusing for end users to read and type those characters as some look similar.
@@ -125,23 +148,15 @@ following characters because it can be confusing for end users to read and type 
 - `+ (plus)
 - / (slash)
 
+### Rate Limiting
 
 
-# Api Documentation
+### Unit Testing
 
-the Api endpoints can be seen via swagger by following this link:
-http://localhost:8080/swagger-ui/index.html#/ 
-
-| Method | Endpoint      | Description                        |
-| ------ | ------------- | ---------------------------------- |
-| `POST` | `createUrl`   | Create a new short URL             |
-| `GET`  | `/{shortUrl}` | Redirect to the original long URL  |
-| `GET`  | `/deleteUrl`  | Delete a Short URL                 |
-| `GET`  | `/health`     | Checks id server is up and running |
-| `GET`  | `/GetAll`     | Gets all items in DB               |
-
-
-# Logging
+### Logging
 Logging is configured using Logback.
 All application logs are written to main.log in the project root directory.
 Logs include info, warnings, and error traces for easier debugging and tracing.
+
+
+
