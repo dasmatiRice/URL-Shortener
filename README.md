@@ -38,6 +38,7 @@ This project demonstrates how to design and implement testable REST API for shor
 - **Java 21** installed  
 - **Maven 3.8+** installed  
 - **MongoDB** installed and running locally (default port `27017`)  
+- API Key for Gemini must be set as environment variable if you choose to use Gemini
 - A stable internet connection to resolve Maven dependencies
 
 ---
@@ -51,7 +52,7 @@ This project demonstrates how to design and implement testable REST API for shor
    
 2. **Build the Project**
    ```bash
-   mvn spring-boot:run
+   mvn clean install
 
 3. **Run the Project**
    ```bash
@@ -61,11 +62,11 @@ This project demonstrates how to design and implement testable REST API for shor
 
 # Design Considerations
 
-A URL Shortening Service seems to be a simple program but actually has many parts and requirements. This section will go over all the design considerations I've made and the tools I have used.
+A URL Shortening Service may seem simple, but it actually involves many parts and requirements. This section will go over all the design considerations I've made and the tools I have used.
 
 **Functional Requirements**
-- Short URL generation - Clients can pass a URl and have a shortened version given back
-- Redirection - edirect them to the original URL link they shortened
+- Short URL generation - Clients can pass a URL and have a shortened version given back
+- Redirection - redirects them to the original URL link they shortened
 - Deletion - delete our url from the database
 - Custom Alias - clients can pass a custom alias to save their url as
 - Custom Expiry Date - Clients will be able to choose the expiration date of their URL
@@ -113,7 +114,7 @@ I've created a flowchart to show how the code flows through the system
 ![alt text](flowchart.png)
 
 - The Controller is the main entry into the system. For info regarding the APIs check out the Api Documentation section
-- The Shorteneing Service implements the main business logic
+- The Shortening Service implements the main business logic
 - The Gemini Service, hosts our AI call to Gemini to check is a URL is malicious or not. For more info check out the AI integration section
 
 ### Api Documentation
@@ -145,14 +146,22 @@ following characters because it can be confusing for end users to read and type 
 ### Rate Limiting
 I implemented Rate limiting using a token-bucket algorithm using bucket4j for the service. Rate limiting is important to prevent people with malicious intents to abuse our system. Its to prevent people to continiously spamming calls to the servers and causing our systems to fail for everyone. 
 
-Ive configured the bucket to hold a maximum of 50 tokens and every minute it refreshes up to 50 tokens. This number can be easily scaled up or down based on the volume of requests we get and out system requirements. 
+I've configured the bucket to hold a maximum of 50 tokens and every minute it refreshes up to 50 tokens. This number can be easily scaled up or down based on the volume of requests we get and our system requirements. 
 
 ### AI Integration
 
 The GeminiService class was added to showcase some basic AI integration into the project. It was easy integrate and has added a lot of benefits to project. I used Gemini specifically to check for malicious original URLs during the encoding process. It was to make sure those new links cant be used to scam or trick other people.   
 Going forward in the future we can ask Gemini to analyze our data and run more complicated scenarios which we can provide to our users.
 
-However, I do not think this service in particular needs AI integration. The calls to Gemini are very bandwidth intensive and to check it every time we create a URL will tie up resources. It may be better to make one large call and when our service has low usage
+While AI integration is not necessary for our service, it demonstrates how AI can be included in our system. With its integration we now have the capabilities of utilizing AI for all of its many benefits in our system, while being mindful of its drawbacks. In our case the drawbacks are that the calls to Gemini are very bandwidth intensive and to call it every time we check for a malicious url during creation will tie up our resources. It may be better to make one large call and when our service has low usage
+
+If you choose not to use Gemini, you an comment out the code block, follow the directions in the comments of the validation class.
+
+To use Gemini in the project you much have an API key configured, you can follow the links below to generate your own key.
+Then you must set your key in the environments variable for Windows machines. The links below will help you configure your environment
+
+links for Gemini integration:
+https://ai.google.dev/gemini-api/docs/api-key
 
 
 ### Unit Testing
@@ -163,5 +172,14 @@ Logging is configured using Logback.
 All application logs are written to main.log in the project root directory.
 Logs include info, warnings, and error traces for easier debugging and tracing.
 
+---
+# Future Improvements
+
+
+
+---
+
+# Contact
+For more information please reach out to me via Linkedin: https://www.linkedin.com/in/ansuman-das-6796b7137/
 
 
