@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,8 +22,11 @@ import com.app.model.CreateResponse;
 import com.app.model.DeleteResponse;
 import com.app.repository.UrlData;
 import com.app.repository.UrlDataRepository;
+import com.app.service.GeminiService;
 import com.app.service.ShortenerService;
 import com.app.validation.ValidationService;
+import com.google.genai.Client;
+import com.google.genai.types.GenerateContentResponse;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
@@ -68,8 +72,9 @@ public class Controller {
 
 			UrlData createdUrl = shortenerService.createURL(apiDevKey, originalUrl, customAlias, expiryDate);
 
+			String resp= "We succeeded in shortening your link! You can access your original url by going to localhost:8080/"+createdUrl.getShortUrl();
 			CreateResponse response = CreateResponse.builder().originalUrl(originalUrl).shortUrl(createdUrl.getShortUrl())
-					.code(HttpStatus.OK).expiration(createdUrl.getExpiryDate()).response("succeeded").build();
+					.code(HttpStatus.OK).expiration(createdUrl.getExpiryDate()).response(resp).build();
 
 			log.info("Created Url Response: ", response);
 
@@ -110,9 +115,9 @@ public class Controller {
 		return response;
 	}
 
-	@GetMapping("/redirectUrl")
+	@GetMapping("/{shortUrl}")
 	public ResponseEntity<Void> redirectUrl(@Valid @NotBlank @RequestParam String apiDevKey,
-			@Valid @NotBlank @RequestParam String shortUrl) {
+			@Valid @NotBlank @PathVariable String shortUrl) {
 
 		log.info("Redirecting URL: ", shortUrl);
 
@@ -141,4 +146,18 @@ public class Controller {
 		log.info("Running Health Check");
 		return "Server is up and running";
 	}
+	
+	@GetMapping("/testAI")
+	public String testAI() {
+		Client client = new Client();
+
+	    GenerateContentResponse response =
+	        client.models.generateContent(
+	            "gemini-2.5-flash",
+	            "Can you tell me if the following link is malicious or not?: mp3raid.com/music/krizz_kaliko.html",
+	            null);
+
+	   return response.text();
+	}
+
 }
