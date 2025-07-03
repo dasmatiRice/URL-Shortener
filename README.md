@@ -139,7 +139,7 @@ following characters because it can be confusing for end users to read and type 
 - 0 (zero)
 - I (capital I)
 - l (lower case L)
-- + (plus)
+- `+` (plus symbol)
 - / (slash)
 
 ### Rate Limiting
