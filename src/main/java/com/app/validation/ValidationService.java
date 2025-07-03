@@ -27,6 +27,7 @@ public class ValidationService {
 			throw new IllegalArgumentException();
 		}
 		
+		//If you choose not to use Gemini, you can comment out the next few lines
 		boolean isMalicious=geminiService.checkForMaliciousUrl(originalUrl);
 		
 		if(isMalicious) {
