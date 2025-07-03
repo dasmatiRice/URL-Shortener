@@ -174,10 +174,20 @@ Logs include info, warnings, and error traces for easier debugging and tracing.
 
 ---
 # Future Improvements
+There are future improvements that can be made to the project, such as:
 
+- Adding stricter rate limiting using concurrent hashmaps to block specific IPs from accessing our service
+- Adding a Cache using Redis
+- Adding Authentication based on users login and adding roles for what they can and cannot do
 
 
 ---
+# License
+
+This project is licensed under the MIT License.
+
+---
+
 
 # Contact
 For more information please reach out to me via Linkedin: https://www.linkedin.com/in/ansuman-das-6796b7137/
